@@ -1,3 +1,25 @@
 #index:
 #    path: /
 #    controller: App\Controller\DefaultController::index
+app_product_reservation:
+    path: '/api/reserve'
+    controller: 'App\Controller\ReserveController::reserveProduct'
+    methods: ['POST']
+
+app_product_release_reservation:
+    path: '/api/release'
+    controller: 'App\Controller\ReleaseController::releaseReservation'
+    methods: ['POST']
+
+app_warehouse_create:
+    path: '/api/warehouse'
+    controller: 'App\Controller\WarehouseController::createWarehouse'
+    methods: ['POST']
+app_product_create:
+    path: '/api/product'
+    controller: 'App\Controller\ProductController::createProduct'
+    methods: ['POST']
+app_product_get:
+    path: '/api/product'
+    controller: 'App\Controller\ProductController::getProduct'
+    methods: ['GET']

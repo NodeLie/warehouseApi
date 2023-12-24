@@ -1,0 +1,84 @@
+version: "3.8"
+services:
+  # db:
+  #   container_name: db_postgres
+  #   restart: always
+  #   image: postgres:15.2
+  #   environment:
+  #     POSTGRES_USER: ivan
+  #     POSTGRES_PASSWORD: ivan
+  #     POSTGRES_DB: warehouse
+  #     PGDATA: /var/lib/postgresql/data
+  #   volumes:
+  #     - ./../pgdata:/var/lib/postgresql/data
+  #     # - ./database.sql:/docker-entrypoint-initdb.d/database.sql
+  #     # - ./new_database.sql:/docker-entrypoint-initdb.d/new_database.sql
+  #   # network_mode: 'host'
+  #   ports:
+  #     - 5432:5432
+  #   networks:
+  #     - warehouse-network
+  db:
+    container_name: postgres
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PW}
+      - POSTGRES_DB=${POSTGRES_DB} #optional (specify default database instead of $POSTGRES_DB)
+    volumes:
+      - ./../pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: always
+    networks:
+      - warehouse-network
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:latest
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_MAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PW}
+    ports:
+      - "5050:80"
+    restart: always
+    networks:
+      - warehouse-network
+
+  php-fpm:
+    container_name: php-fpm
+    build:
+      context: ./../
+      dockerfile: ./docker/php-fpm/Dockerfile
+      args:
+        - PUID=${PUID}
+        - PGID=${PGID}
+    volumes:
+      - /var/www/vendor/
+      - ./../:/var/www/
+    expose:
+      - "9000"
+    networks:
+      - warehouse-network
+    depends_on:
+      - db
+  nginx:
+    image: nginx:latest
+    container_name: nginx_server
+    volumes:
+      - ./../docker/php-fpm/nginx.conf:/etc/nginx/nginx.conf
+      - ./../:/var/www
+    ports:
+      - ${NGINX_HOST_HTTP_PORT}:8080
+    depends_on:
+      - php-fpm
+    networks:
+      - warehouse-network
+
+  
+
+networks:
+  warehouse-network:
+
+volumes:
+  db_data:
